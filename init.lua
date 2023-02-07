@@ -54,11 +54,22 @@ require('packer').startup(function(use)
   use 'lukas-reineke/indent-blankline.nvim' -- Add indentation guides even on blank lines
   use 'numToStr/Comment.nvim' -- "gc" to comment visual regions/lines
   use 'tpope/vim-sleuth' -- Detect tabstop and shiftwidth automatically
+
+  -- Folding
   use { 'anuvyklack/pretty-fold.nvim',
       config = function()
         require('pretty-fold').setup()
       end
   }
+
+  -- Browser
+  use { 'nvim-tree/nvim-tree.lua',
+    requires = {
+      'nvim-tree/nvim-web-devicons', -- optional, for file icons
+    },
+    tag = 'nightly' -- optional, updated every week. (see issue #1193)
+  }
+
 
   -- Fuzzy Finder (files, lsp, etc)
   use { 'nvim-telescope/telescope.nvim', branch = '0.1.x', requires = { 'nvim-lua/plenary.nvim' } }
@@ -450,7 +461,7 @@ end
 map("n", ";", ":")
 map("n", ":", ";")
 map("n", "<tab>", "za")
-map("c", "w", "W")
+-- map("c", "w", "W")
 
 local opt = vim.opt
 
@@ -460,7 +471,38 @@ opt.foldexpr = "nvim_treesitter#foldexpr()"
 opt.foldcolumn = "4"
 
 opt.clipboard = 'unnamedplus'
-vim.g.relativenumber = true
+
+-- disable netrw at the very start of your init.lua (strongly advised)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
+
+-- OR setup with some options
+require("nvim-tree").setup({
+  sort_by = "case_sensitive",
+  view = {
+    width = 30,
+    mappings = {
+      list = {
+        { key = "u", action = "dir_up" },
+      },
+    },
+  },
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+})
+
+vim.keymap.set('n', '<leader>b', require('nvim-tree').toggle, { buffer = bufnr, desc = desc })
+vim.keymap.set('n', '<leader>g', ':0G<CR>', { buffer = bufnr, desc = desc })
+vim.keymap.set('c', 'Git', 'vertical Git', { buffer = bufnr, desc = desc })
+-- vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 --
